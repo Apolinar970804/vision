@@ -1,0 +1,33 @@
+nombre : cliente ci
+
+en :
+  empujar :
+    caminos :
+      - ' cliente / ** '
+
+trabajos :
+  construir y desplegar :
+    se ejecuta : ubuntu-latest
+    env :
+      WEB_PATH : $ web
+      CUENTA : $ {{secretos.STORAGE_ACCOUNT}}
+      CLAVE : $ {{secretos.STORAGE_KEY}}
+    pasos :
+    # revisa el repositorio
+    - usos : acciones / checkout @ master
+    
+    # instalar dependencias, compilar y probar
+    - nombre : npm install, build
+      ejecutar : |
+        cliente pushd
+        npm install
+        npm ejecutar build --si-present
+        popd
+    # borrar sitio antiguo
+    - nombre : borrar sitio antiguo
+      ejecutar : |
+        az storage blob delete-batch --source $ WEB_PATH --ccount-name $ ACCOUNT --account-key $ KEY
+    # empujar al almacenamiento azul
+    - nombre : empujar al almacenamiento azul
+      ejecutar : |
+        az almacenamiento blob upload-batch -s client / dist -d $ WEB_PATH --nombre-cuenta $ ACCOUNT --clave-cuenta $ KEY
